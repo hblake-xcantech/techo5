@@ -1,4 +1,4 @@
-//go:build !dot && !spot && !panel
+//go:build !dot && !spot && !panel && !nervos_echo
 
 package update
 
