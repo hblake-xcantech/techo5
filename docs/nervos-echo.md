@@ -54,3 +54,20 @@ Keep `upstream` pointed at HuskerMinion/techo5 and `origin` at the fork. Merge a
 explicit upstream revision into the NervOS branch, run update/config/rollback
 checks, review the small patch set, and advance the superproject gitlink. Do not
 sync running devices automatically from upstream HEAD.
+
+## Reproducible candidate assembly
+
+`tools/nervos-rootfs.py` downloads and verifies the pinned upstream v1.6.8 signed
+manifest, checks its rootfs hash, and replaces only the compiled ARM daemon and
+release label. It preserves archive ownership, modes, links and recovery files;
+it never extracts an archive or touches hardware. It refuses a wrong base hash,
+wrong architecture, unsafe path, missing replacement member or existing output.
+Use a version newer than the upstream base, such as `v1.6.9-nervos.1`, to preserve
+the updater's downgrade guard. Build the daemon with `-tags nervos_echo`, then use
+upstream's `cmd/mkmanifest` and an operator-held signing seed through stdin to sign
+the candidate. Verify the signature and every artifact hash before any upload.
+This builder does not publish or install anything.
+
+Run `python3 tools/test_nervos_slots.py` and `python3 tools/test_nervos_rootfs.py`,
+plus `go test -tags nervos_echo ./internal/update/... ./internal/config` from `echod`.
+The slot tests run the real slotctl on disposable directory stores, not a device.
