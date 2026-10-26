@@ -720,7 +720,10 @@ func (r *renderer) draw(s scene) {
 			onPhoto(func() { r.slideshowScreensaverPage(s) })
 		} else if s.nowPlaying {
 			r.nowPlaying(s)
+		} else if r.nervosContext(s) {
+			// Shared context occupies only an otherwise idle clock; existing owners stay above it.
 		} else {
+			s = nervosClockFallback(s)
 			// walnut is read inside, so the patches are made of the palette onPhoto puts in force.
 			page := func() { r.readableOver(behind, walnut, slideshowWash, func() { r.bigClock(s) }) }
 			if s.slideshow != nil {

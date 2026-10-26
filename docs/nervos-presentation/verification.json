@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-26T23:28:33.216515+00:00",
+  "status": "render_verified",
+  "owner": "NerveOS Echo adapter / commissioning owner",
+  "authorization": "Local source implementation, synthetic testing and previews; no deployment or live service/device changes by presentation agent.",
+  "sourceFiles": {
+    "echod/internal/feature/display/render.go": "bb3c11fc80da5264d806f65e67b9fdde91501a65ea8cef591613e9d7904d3ae3",
+    "echod/internal/feature/display/nervos_context.go": "4d9ccbb76187b85a514dc2a746644a1f0be716e3de8d1cb9cd003f5c4bf5f107",
+    "echod/internal/feature/display/nervos_context_disabled.go": "cea38421c017214927827dcb22035a3829a2e88cb3a2b070dac4f89ca89aa38d",
+    "echod/internal/feature/display/nervos_context_test.go": "bc035cdb5545dbb9db82c4f5c4e30ebfe72bc9756d45ac7c6e90834f9d6c4cc3",
+    "echod/internal/feature/nervoscontext/context.go": "9df708cce8c896c05881d6cfb905a70355c0a4c4b6faf3ba68592a964966df99",
+    "echod/internal/feature/nervoscontext/context_test.go": "ad1949a4d6bd2057df0f7d6fb37a04203b3df6a7e45672d29684761ae4116aff",
+    "echod/internal/feature/nervoscontext/runtime.go": "ea38957152f85c88d59b2c99cd4787c41cf783803c188974c8730f71634a6282",
+    "echod/internal/feature/nervoscontext/runtime_test.go": "5b08c9c58598d6ca5a9e07fc374fbcf12110530150fa7477ba628479460c0bf2",
+    "docs/nervos-presentation/README.md": "7d2555839960f5f3bb9fd6b4d6d8d10aef4cf1c1ce4c9cc8dffdacd9fb54484f"
+  },
+  "previews": {
+    "docs/nervos-presentation/preview/nervos-empty.png": {
+      "sha256": "74a580d826c5785488c0c018a81dfa0b27feeaead276144e2044ddcfadcbe14c",
+      "width": 960,
+      "height": 480,
+      "renderer": "actual TECHO5 native Go renderer",
+      "observation": "Visible text fits; no clipping or overlap in inspected export"
+    },
+    "docs/nervos-presentation/preview/nervos-long.png": {
+      "sha256": "deb15d93c6dca10d7deaeeec21190a59500c5d7ecf11493554f88de0c15d12db",
+      "width": 960,
+      "height": 480,
+      "renderer": "actual TECHO5 native Go renderer",
+      "observation": "Visible text fits; no clipping or overlap in inspected export"
+    },
+    "docs/nervos-presentation/preview/nervos-normal.png": {
+      "sha256": "db61df5aaa96414f5bc59fc8057cf9b324fd4181af2d45f037bd4ab946bc315e",
+      "width": 960,
+      "height": 480,
+      "renderer": "actual TECHO5 native Go renderer",
+      "observation": "Visible text fits; no clipping or overlap in inspected export"
+    },
+    "docs/nervos-presentation/preview/nervos-voice.png": {
+      "sha256": "80e2cb02af3edb1e575d87c1fa483f9aa93adbf614de1fb10639fb2835d44cda",
+      "width": 960,
+      "height": 480,
+      "renderer": "actual TECHO5 native Go renderer",
+      "observation": "Visible text fits; no clipping or overlap in inspected export"
+    }
+  },
+  "checks": [
+    {
+      "command": "go test -race -tags nervos_echo ./internal/feature/nervoscontext -count=1",
+      "environment": "native Mac host",
+      "outcome": "pass",
+      "durationSeconds": 1.999,
+      "observer": "presentation agent",
+      "coverage": "Six tests: scope/private/stale/future rejection, strict JSON, durable revision handling, concurrent snapshot, trusted-file rejection and live-file lifecycle. Invalid candidates do not consume revision."
+    },
+    {
+      "command": "nervos-context.test -test.run '^TestNervos' -test.v",
+      "environment": "isolated Workshop Linux amd64, unprivileged scratch files",
+      "outcome": "pass",
+      "observer": "commissioning owner relayed execution result",
+      "coverage": "All six context tests pass; live file lifecycle uses an injected unprivileged reader, with production root ownership and symlink policy separately tested."
+    },
+    {
+      "command": "SHOW_PREVIEW=<scratch-dir> nervos-display-final.test -test.run '^TestNervos' -test.v",
+      "environment": "isolated Workshop Linux amd64, scratch configuration",
+      "outcome": "pass",
+      "observer": "commissioning owner ran; presentation agent inspected all four copied PNGs",
+      "coverage": "Foreground and manual style/skin gates, native normal/long/empty/voice previews, overflow fallback and palette-follow tests."
+    },
+    {
+      "command": "techo5-display.test -test.run '^TestShowClockStylesDraw$' -test.v",
+      "environment": "isolated Workshop Linux amd64, upstream untagged build",
+      "outcome": "pass",
+      "durationSeconds": 8.32,
+      "observer": "commissioning owner relayed execution result",
+      "coverage": "Existing Show clock-style rendering regression."
+    },
+    {
+      "command": "GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go test -tags nervos_echo -c ./internal/feature/display; same for ./internal/feature/nervoscontext",
+      "environment": "Mac cross compiler",
+      "outcome": "pass",
+      "observer": "presentation agent",
+      "coverage": "ARMv7 target compile; also compiled Linux amd64 tagged packages and untagged display."
+    },
+    {
+      "command": "Visual inspection of four native PNGs",
+      "environment": "local image viewer at native 960x480",
+      "outcome": "pass",
+      "observer": "presentation agent and commissioning owner",
+      "coverage": "Normal and long shared context, empty clock fallback, preserved upstream thinking screen. Four body and two explanation lines fit."
+    }
+  ],
+  "runtimeHook": "Tagged display import registers nervoscontext at component.Device order 37. Run polls fixed operator files every second. render.go calls nervosContext only after existing foreground ownership checks; Snapshot rechecks expiry each idle frame.",
+  "reload": "After compiled installation and explicit settings/binding opt-in, valid higher revisions swap live on poll plus normal frame cadence. Invalid input retains prior value only until original expiry. Durable watermark prevents restart/reconnect replay. No reboot for projection data or existing setting changes.",
+  "limits": [
+    "No target hardware rendering, readability, live reload, manual-control or expiry observation.",
+    "No live Orbit transport, cryptographic projection verifier, enrollment proof or action broker connected.",
+    "Reader trusts root-owned operator files; producer must enforce actual content audience. Shared labels alone cannot classify private prose.",
+    "Initial component setup in isolated Linux tests logged expected absent board vendor/privacy/lux/audio hardware warnings. Selected tests requested no hardware-control operation; no target was connected.",
+    "Native previews call actual contextPage directly with synthetic text; trust/state lifecycle is tested separately. They do not prove an end-to-end live operator connection."
+  ],
+  "rollback": "Select another existing clock style or remove binding; source patch is isolated, upstream builds use no-op hooks.",
+  "metrics": {
+    "model": null,
+    "cost": null,
+    "exclusiveEffortSeconds": null,
+    "note": "Actual usage/cost and exclusive effort were not instrumented."
+  }
+}

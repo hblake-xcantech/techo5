@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "id": "nervos-echo-shared-context",
+  "why": "Make shared room context readable on the native Echo display while preserving human settings and foreground owners.",
+  "owner": "NerveOS Echo adapter",
+  "authorization": {
+    "source": "Blake October 26 request, relayed by commissioning owner to echo_live_presentation",
+    "allowed": [
+      "Implement and test a native Echo context slice",
+      "Generate synthetic native previews"
+    ],
+    "notAuthorized": [
+      "Deploy or connect to live Echo",
+      "Alter HA, Pixel, capture, audio or shared services"
+    ]
+  },
+  "brief": {
+    "audience": "People sharing the room; no private/adult/child identity grants",
+    "task": "Read one current shared-context paragraph, then return to the existing conversation or clock",
+    "destination": "TECHO5 native Show framebuffer renderer in NerveOS fork",
+    "geometry": "960 by 480 native pixels",
+    "contentSource": "Synthetic shared-room text only; production trusted operator writer is not connected",
+    "formats": [
+      "Go source",
+      "native PNG previews",
+      "JSON verification manifest"
+    ],
+    "designDecisions": [
+      "Explicit NervOS palette preset uses NerveTheme Slate #293b46, Cloud #edf0ed, Signal #91a99a; current human theme and custom colors remain authoritative",
+      "NervOS Home type-first paragraph; 40px outer margin, 42px body, 26px explanation",
+      "Four body lines and two explanation lines; preserve human font and yield if it does not fit",
+      "Stable silent surface; no Presence timing/audio or capture changes",
+      "Explicit existing Clock style choice plus separate trusted operator binding"
+    ],
+    "assumptions": [
+      "Room viewing distance and physical contrast acceptance unverified",
+      "Actual transport and operator enrollment need separate commissioning"
+    ],
+    "fieldStatus": {
+      "geometry": "locked",
+      "destination": "locked",
+      "contentSource": "locked",
+      "designDecisions": "assumed"
+    }
+  },
+  "tiers": [
+    {
+      "name": "native-preview",
+      "trigger": "Native Go renderer can cross-compile for isolated Linux test host",
+      "retainedRequirements": [
+        "Actual renderer code",
+        "960x480 export",
+        "Strict scoped expiry and revision handling",
+        "Human foreground and settings preservation"
+      ],
+      "losses": [
+        "No target hardware proof",
+        "No upstream live Orbit transport"
+      ],
+      "validationRequired": [
+        "Inspect normal/long/empty/voice PNGs",
+        "Run rejection, atomic revision, expiry and manual-choice tests",
+        "Cross-compile ARM target and untagged display"
+      ],
+      "withinAuthorization": true
+    }
+  ],
+  "selectedTier": "native-preview",
+  "acceptance": [
+    {
+      "id": "layout",
+      "requirement": "Native normal/long paragraphs fit without clipping at 960x480; empty state returns to clock and voice remains primary",
+      "severity": "must",
+      "method": "Inspect native PNGs and run layout overflow rejection",
+      "requiredEvidence": "render",
+      "status": "pass",
+      "evidenceIds": [
+        "native-render"
+      ]
+    },
+    {
+      "id": "boundary",
+      "requirement": "Reject malformed/private/stale/wrong-scope/replayed input, atomically apply fresh revisions, expire last good, and preserve manual choices",
+      "severity": "must",
+      "method": "Focused native/race and isolated Linux tests",
+      "requiredEvidence": "interaction",
+      "status": "pass",
+      "evidenceIds": [
+        "boundary-tests"
+      ]
+    },
+    {
+      "id": "target",
+      "requirement": "Verify physical readability and live reload/expiry while respecting real manual settings",
+      "severity": "must",
+      "method": "Commissioning owner observes target after authorized installation",
+      "requiredEvidence": "device",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "artifact": {
+    "path": "verification.json",
+    "sha256": "dbc54c4157d9a0744c12d316f6cd184fa3145573d5f75a3bd32ff5f305c2ca17",
+    "editableSource": "../../echod/internal/feature/display/nervos_context.go"
+  },
+  "evidence": [
+    {
+      "id": "native-render",
+      "artifactSha256": "dbc54c4157d9a0744c12d316f6cd184fa3145573d5f75a3bd32ff5f305c2ca17",
+      "kind": "render",
+      "source": "verification.json and preview/nervos-{normal,long,empty,voice}.png",
+      "observedAt": "2026-10-26T23:28:33.216515+00:00",
+      "method": "Native Linux test renderer exported PNGs; presentation agent inspected all four local images at 960x480",
+      "outcome": "pass",
+      "limits": "Synthetic local render only; no target panel/brightness/viewing-distance observation",
+      "observer": "presentation agent and commissioning owner",
+      "covers": "Normal/long text fit, empty clock fallback, upstream voice foreground",
+      "target": "960x480 native Echo Show frame geometry"
+    },
+    {
+      "id": "boundary-tests",
+      "artifactSha256": "dbc54c4157d9a0744c12d316f6cd184fa3145573d5f75a3bd32ff5f305c2ca17",
+      "kind": "interaction",
+      "source": "verification.json checks and sourceFiles",
+      "observedAt": "2026-10-26T23:28:33.216515+00:00",
+      "method": "Host race tests, isolated Linux native tests and untagged clock regression; Linux amd64/ARMv7 compile checks",
+      "outcome": "pass",
+      "limits": "No physical input/audio test, live Orbit writer or target reload; file lifecycle test uses an injected unprivileged reader",
+      "observer": "presentation agent; Linux execution relayed by commissioning owner",
+      "covers": "Privacy/scope/freshness/revision and atomic persistence boundaries, foreground/manual choices, palette preservation",
+      "target": "Go store, feature lifecycle and native display"
+    }
+  ],
+  "handoff": {
+    "status": "render_verified",
+    "lastVerifiedResult": "Six context tests pass with host race detection and on isolated Linux; three tagged native display tests and upstream clock regression pass. All four native 960x480 PNGs inspected without clipping/overlap. ARMv7 compile passes; target remains unverified.",
+    "unresolved": [
+      "Physical rendering and reload unverified",
+      "Trusted operator transport and enrollment not connected"
+    ],
+    "nextOwner": "NerveOS Echo commissioning owner",
+    "reopenWhen": "A trusted operator writer and authorized target commissioning are ready for live rendering/reload/expiry and manual-control checks",
+    "source": "docs/nervos-presentation/README.md and synthetic tests",
+    "rollback": "Select another clock style or remove operator binding; remove isolated patch for source rollback."
+  },
+  "evaluation": {
+    "executorModel": null,
+    "reviewerModel": null,
+    "elapsedSeconds": null,
+    "cost": null,
+    "observedDefects": [],
+    "qualityComparison": "passed_on_recorded_case"
+  },
+  "tierHistory": []
+}

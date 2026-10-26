@@ -17,14 +17,14 @@ A fork release cannot silently replace itself with upstream's next release.
 | Change | Existing mechanism | Device reboot |
 |---|---|---|
 | Supported runtime settings | Feature setters and persistent config store | No |
-| Orbit/context and data-driven interface content | To be connected through Nerve's scoped adapter | Not yet implemented |
+| Validated shared-room text after feature installation | Fixed operator-owned projection file, atomic revision/expiry checks | No; trusted transport/enrollment pending |
 | Compiled renderer/daemon on this Linux slot image | Signed rootfs into inactive A/B slot | Yes |
 | Kernel/boot image | Separate board-specific recovery process | Yes |
 
-Do not claim arbitrary source/UI changes are rebootless. A future live presentation
-layer must validate an atomic revision before swapping it, retain the last good
-revision, preserve manually changed brightness/audio controls, and have no executable
-code or unbounded action URLs in content. It must not create another firmware updater.
+Do not claim arbitrary source/UI changes are rebootless. The native [shared-room presentation](nervos-presentation/README.md) validates an atomic
+revision before swapping it, retains the last good revision until its original expiry,
+preserves manually changed controls, and interprets no executable content or action URLs.
+Its Linux previews and tests pass; it has not yet been installed on the Echo.
 Menus remain available for recovery and explicit control; normal use should be an
 AI interaction, with useful context and restrained attention cues.
 
